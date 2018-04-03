@@ -1,25 +1,69 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Peer_Assignment_1"
+author: "Mustafa"
+date: "March 31, 2018"
 ---
 
+##Loading the data
 
-## Loading and preprocessing the data
+```{r loading_data}
+data <- read.csv("activity.csv")
+```
+
+## Total number of steps
+
+```{r steps}
+  library(ggplot2)   
+  ## Calculate the total number of steps taken per day
+  spd <- aggregate(steps ~ date, data, sum, na.rm=TRUE)
+
+  ## Calculate and report the mean and median of the total number of steps taken per day
+  mean(spd$steps)
+  median(spd$steps)
+
+  ## Make a histogram of the total number of steps taken each day
+  barplot(spd$steps)
+  
+  ## Calculate the average daily activity
+  avg <- tapply(data$steps, data$interval, mean, na.rm=TRUE)
+  
+  ## Making a time series
+  plot(names(avg), avg, xlab="5-min interval", type="l", ylab="the average number of steps")
+  ## Getting the maximum average and the corrosponding interval
+  maximum_avg <- max(avg)
+  maximum_interval <- as.numeric(names(avg)[which(avg==max(avg))])
+  maximum_avg
+  maximum_interval
+  
+  
+  ## Calculating the total number of NAs
+  nas <- sum(is.na(data$steps))
+  nas
+  
+  ## Duplicating the dataset
+  new_data <- data
+  new_data$steps[which(is.na(data$steps))] <- as.vector(avg[as.character(data[which(is.na(data$steps)),3])])
+  
+  ## Calculating the new steps per day
+  spd2 <- aggregate(steps ~ date, new_data, sum, na.rm=TRUE)
+  
+
+  ## Calculate and report the mean and median of the new total number of steps taken per day
+  mean(spd2$steps)
+  median(spd2$steps)
+
+  ## Make a histogram of the total number of the new steps taken each day
+  barplot(spd2$steps)
+  
+  
+  ## Finding out the difference between weekdays and weekends
+  new_data$dayType <- ifelse(as.POSIXlt(new_data$date)$wday %in% c(0,6), "weekends","weekdays")
+  
+  aggregateData <- aggregate(steps ~ interval + dayType, data=new_data, mean)
+  
+  ## Creating the graph
+  ggplot(aggregateData, aes(interval, steps)) + geom_line() + facet_grid(dayType ~ .) + 
+    xlab("5-minute interval") + ylab("avarage number of steps")
+```
 
 
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
